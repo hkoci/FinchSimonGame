@@ -27,7 +27,7 @@ The program that will be implemented and designed is a Simon says program. Simon
 
 JavaFX was used to create the main menu of the game
 
-![MainMenu](docs\assets\MainMenu.png)
+![MainMenu](/docs/assets/MainMenu.png)
 
 ##### Settings
 
@@ -35,25 +35,25 @@ JavaFX was used to create the main menu of the game
 
 Ability to choose Finch beak colours which flash on the individual finch (including the virtual finch if not enough finches are connected)
 
-![SettingsColourPicker](docs\assets\SettingsColourPicker.png)
+![SettingsColourPicker](/docs/assets/SettingsColourPicker.png)
 
 ###### Colour Picker Preview (virtual)
 
-![SettingsPreview](docs\assets\SettingsPreview.png)
+![SettingsPreview](/docs/assets/SettingsPreview.png)
 
 ##### Single Player
 
 The user picks how many Finch robots are connected - the number of non-present Finch robots (the game requires 5), these would be virtual (on-screen clickable).
 
-![SinglePlayerDeviceCount](docs\assets\SinglePlayerDeviceCount.png)
+![SinglePlayerDeviceCount](/docs/assets/SinglePlayerDeviceCount.png)
 
 The game would then display virtual Finches within the game, a lives and score counter is present to help motivate the user. The scores will be stored, where the user can view their previous high score.
 
-![VirtualFinch](docs\assets\VirtualFinch.png)
+![VirtualFinch](/docs/assets/VirtualFinch.png)
 
 In the event the user runs out of lives, the game will end.
 
-![GameOver](docs\assets\GameOver.png)
+![GameOver](/docs/assets/GameOver.png)
 
 ##### Proof of Concept
 
@@ -61,11 +61,11 @@ These feature interfaces was developed but not implemented successfully due to n
 
 ###### Multiplayer
 
-![MultiplayerPOC](docs\assets\MultiplayerPOC.png)
+![MultiplayerPOC](/docs/assets/MultiplayerPOC.png)
 
 ###### Statistics
 
-![StatisticsPOC](docs\assets\StatisticsPOC.png)
+![StatisticsPOC](/docs/assets/StatisticsPOC.png)
 
 ### Team 🧑🏻‍🤝‍🧑🏻
 
