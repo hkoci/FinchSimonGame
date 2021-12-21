@@ -1,0 +1,41 @@
+import java.net.*;
+import java.io.*;
+import java.util.Scanner;
+import java.io.Serializable;
+
+public class GameMulitplayerServer {
+	public static void main(String[] args) throws Exception
+	{
+		
+		ServerSocket ss = new ServerSocket(9999);
+		Socket s = ss.accept();
+		System.out.println("A client has connected");
+		//Buffered Reader in or out data
+		BufferedReader keyRead = new BufferedReader(new InputStreamReader(System.in));
+		OutputStream ostream = s.getOutputStream();
+		PrintWriter pwrite = new PrintWriter(ostream, true);
+		
+		// receiving from server ( receiveRead  object)
+		InputStream istream = s.getInputStream();
+		BufferedReader receiveRead = new BufferedReader(new InputStreamReader(istream));
+		
+		String receiveMessage, sendMessage = ""; 
+		
+		while((receiveMessage = receiveRead.readLine()) != null)
+		{
+			while(true)
+			{
+				//Get sent data
+				receiveMessage = receiveRead.readLine();
+				//Print sent data
+				System.out.println(receiveMessage);
+				//Gets keyboard input
+				sendMessage = keyRead.readLine();
+				//Sends message
+				pwrite.println();
+				pwrite.flush();
+
+			}
+		}               
+	}                    
+}

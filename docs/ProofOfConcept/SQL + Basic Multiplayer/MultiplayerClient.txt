@@ -1,0 +1,40 @@
+import java.net.*;
+import java.io.*;
+import java.util.Scanner;
+
+public class GameMultiplayerClient
+{
+	public static void main(String[] args) throws IOException
+	{
+		int colour = 0;
+		//Creates a new TCP socket, set to host ip and port number
+		Socket s = new Socket("Localhost",9999);
+		System.out.println("Has connected to a server");
+		
+		//Buffered Reader in or out data
+		BufferedReader keyRead = new BufferedReader(new InputStreamReader(System.in));
+		//Object that allows socket to send data
+		OutputStream ostream = s.getOutputStream();
+		//Object that sends the data the user wants to send
+		PrintWriter pwrite = new PrintWriter(ostream, true);
+		//Object that gets data that has been sent to the socket
+		InputStream istream = s.getInputStream();
+		//Buffered Reader in or out data
+		BufferedReader receiveRead = new BufferedReader(new InputStreamReader(istream));
+		
+		//Declare variables for in and out strings
+		String receiveMessage, sendMessage = ""; 
+		//While the receive message, which is equal to the input buffer reader, isn't null
+		while(true)
+		{
+			//Get sent data
+			receiveMessage = receiveRead.readLine();
+			//Print sent data
+			System.out.println(receiveMessage);
+			//Sends inputed message
+			pwrite.println(sendMessage);
+			pwrite.flush();
+		}
+		
+	}                    
+}          

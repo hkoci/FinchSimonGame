@@ -1,0 +1,26 @@
+import java.net.*;
+import java.io.*;
+
+
+public class GameMultiplayerClient
+{
+	public static void main(String[] args) throws Exception
+	{
+		Socket s = new Socket("Localhost",9999);
+		System.out.println("connected");
+		DataOutputStream dout = new DataOutputStream(s.getOutputStream());
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		while (true)
+		{
+			String so = br.readLine();
+			dout.writeUTF(so);
+			if (so.equalsIgnoreCase("Exit"))
+			{
+				break;
+			}
+		}
+		s.close();
+		
+	}
+
+}

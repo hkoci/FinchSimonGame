@@ -1,0 +1,329 @@
+import java.sql.Statement;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Scanner;
+
+public class GameLogin
+{
+	
+	public static void main(String[] args) throws Exception 
+	{
+		createTable();
+		
+		System.out.println("Would you like to 1) register or 2) login?");
+		Scanner choiceInput = new Scanner(System.in);
+		int choice = choiceInput.nextInt();
+		if (choice == 1)
+		{
+			System.out.println("Register");
+			registerInputUser();
+		}
+		else if (choice == 2)
+		{
+			System.out.println("Login");
+			login();
+		}
+		
+		else
+		{
+			System.out.println("Enter an option please.");
+			main(args);
+		}
+	}
+
+	//Method for user to input desired username for check
+	public static void registerInputUser() throws Exception
+	{
+		try 
+		{
+			Scanner usernameInput = new Scanner(System.in);
+			System.out.println("Please input your desired username");
+			String user = usernameInput.nextLine();
+			selectUserFromTable(user);
+		}catch(Exception e) {System.out.println(e);}
+		
+	}
+	
+	//Method for user to input extra details for registration
+	public static void register(String username) throws Exception
+
+	{
+		try 
+		{
+			System.out.println("Please enter your first name.");
+			Scanner firstInput = new Scanner(System.in);
+			String firstName = firstInput.nextLine();
+			
+			System.out.println("Please enter your last name.");
+			Scanner lastInput = new Scanner(System.in);
+			String lastName = lastInput.nextLine();
+			
+			System.out.println("Please enter your password.");
+			Scanner passInput = new Scanner(System.in);
+			String password = lastInput.nextLine();
+			
+			insertToTable(username, firstName, lastName, password);
+		}catch(Exception e) {System.out.print(e);}
+	}
+	
+	//Method for user to input log in details for check
+	public static void login() throws Exception
+	{
+		try
+		{
+			System.out.println("Enter your username please.");
+			Scanner loginUser = new Scanner(System.in);
+			String username = loginUser.nextLine();
+			
+			System.out.println("Enter your password please.");
+			Scanner loginPass = new Scanner(System.in);
+			String password = loginPass.nextLine();
+			
+			checkForUser(username, password);
+		}catch(Exception e) {System.out.println(e);}
+	}
+	
+	//Method checks if inputed username and password exist in the database for login
+	public static void checkForUser(String username, String password) throws Exception
+	{
+		try 
+		{
+			Connection con = getConnection();
+			PreparedStatement select = con.prepareStatement("SELECT * FROM finchsimonUsers "
+					+ "WHERE username = '"+username+"' AND password = '"+password+"'");
+			
+			ResultSet result = select.executeQuery();
+			
+			if (result.next() == true)
+			{
+				System.out.println("Enter the game!");
+				hasPlayedBefore(username);
+			}
+			
+			else
+			{
+				System.out.println("Login failed, try again!");
+				login();
+			}
+			
+		}catch(Exception e) {System.out.println(e);}
+	}
+	
+	//Method checks if user has played the game before
+	public static void hasPlayedBefore(String user) throws Exception
+	{
+		int gamesPlayed = 0;
+		try
+		{
+			Connection con = getConnection();
+			PreparedStatement select = con.prepareStatement("SELECT gamesplayed FROM finchsimonUsers WHERE username = '"+user+"'");
+			ResultSet result = select.executeQuery();
+			//gets the value of the field
+			while (result.next())
+			{
+				gamesPlayed = result.getInt("gamesplayed");
+			}
+			
+			if (gamesPlayed == 0)
+			{
+				//Do not played before function
+				System.out.println("You have not played before");
+				stats(user);
+			}
+			else
+			{
+				//Do played before function
+				System.out.println("You have played before");
+			}
+			
+		}catch(Exception e) {System.out.println(e);}
+	}
+
+	//Method updates the user's hi score
+	public static void updateHiscore(String user, int hiscore)throws Exception
+	{
+		try 
+		{
+			Connection con = getConnection();
+			//Updates hiscore in users table
+			PreparedStatement updateHS = con.prepareStatement("UPDATE finchsimonUsers SET hiscore = '"+hiscore+"' WHERE username = '"+user+"'");
+			//Updates hiscore in hiscores table
+			PreparedStatement updateHS2 = con.prepareStatement("UPDATE finchHiscores SET score = '"+hiscore+"' WHERE username = '"+user+"'");
+			updateHS.executeUpdate();
+			updateHS2.executeUpdate();
+			System.out.println("Hi score has been set to " + hiscore);
+		}catch (Exception e) {System.out.print(e);}
+		
+		finally
+		{
+			getScoreBoard();
+		}
+	}
+
+	//Get user's statistics and displays them to the user
+	public static void stats(String user)throws Exception
+	{
+		Connection con = getConnection();
+		PreparedStatement select = con.prepareStatement("SELECT * FROM finchsimonUsers WHERE username = '"+user+"'");
+		ResultSet result = select.executeQuery();
+		
+		while (result.next())
+		{
+			String username = result.getString("username");
+			int hiscore = result.getInt ("hiscore");
+			int gamesplayed = result.getInt("gamesplayed");
+			float averagescr = result.getFloat("averagescore");
+			int overallscr = result.getInt("overallscore");
+			
+			System.out.println("Name " + username);
+			System.out.println("Hiscore " + hiscore);
+			System.out.println("Average Score " + averagescr);
+			System.out.println("Games played " + gamesplayed);
+			System.out.println("Overall score " + overallscr);
+		}
+		
+	}
+	
+	//Get data of all hi scores and display them
+	public static void getScoreBoard()throws Exception
+	{
+		Connection con = getConnection();
+		//Selects every record in FinchHiscores and orders then in descending order. 1st at the top last at the bottom
+		PreparedStatement select = con.prepareStatement("SELECT * FROM finchHiscores ORDER BY score DESC");
+		
+		ResultSet result = select.executeQuery();
+		
+		int place = 1;
+		
+		String player = "";
+		int score = 0;
+		
+		//While loop repeatedly prints out each user and their score in order from highest to lowest
+		while(result.next())
+		{
+			player = result.getString("username");
+			score = result.getInt("score");
+			
+			System.out.println(place+ ": "+ player + " With score: " + score);
+			place = place + 1;
+		}
+	}
+	
+	//Method checks to see if inputed username is already taken by another user
+	public static void selectUserFromTable(String name) throws Exception
+	{
+		String username = name;
+		try 
+		{
+			Connection con = getConnection();
+			PreparedStatement select = con.prepareStatement("SELECT * FROM finchsimonUsers WHERE username = '"+username+"'");
+			
+			ResultSet result = select.executeQuery();
+			
+			if (result.next() == true)
+			{
+				System.out.println("There are users with this name");
+				registerInputUser();
+			}
+			else
+			{
+				System.out.println("There are no users with this name");
+				register(username);
+			}
+			System.out.println("Select complete!");
+		}catch(Exception e) {System.out.println(e);}
+	}
+	
+	//Inserts user inputed data into the database table
+	public static void insertToTable(String user, String first, String last, String pass) throws Exception
+	{
+		try 
+		{
+			Connection con = getConnection();
+			//Inserts previously inputed data and puts it into the correct field. Or sets the field to a base value in FinchSimonUsers table
+			//This creates a new record
+			PreparedStatement insert = con.prepareStatement("INSERT INTO finchsimonUsers (username, firstname, lastname, password, hiscore, averagescore, gamesplayed, overallScore) "
+					+ "VALUES('"+user+"', '"+first+"', '"+last+"', '"+pass+"', 0, 0, 0, 0)");
+			insert.executeUpdate();
+			//Retrieves the auto generated id of the recently created user. 
+			PreparedStatement select = con.prepareStatement("SELECT id FROM finchsimonUsers WHERE username = '"+user+"'");
+			ResultSet result = select.executeQuery();
+			//Gets the result of the Select Statement and sets it as the value of a string
+			String id = "";
+			while (result.next())
+			{
+				id = result.getString("id");
+			}
+			//Inserts previously inputed or retrieved data into the correct field in FinchHiscores table.
+			//This creates a new record for the new user in this table
+			PreparedStatement insert2 = con.prepareStatement("INSERT INTO finchHiscores (username, id) VALUES ('"+user+"', '"+id+"')");
+			
+			insert2.executeUpdate();
+			} catch(Exception e) {System.out.println(e);}
+		finally
+		{
+			System.out.println("Registeration Complete");
+			login();
+			
+		}
+	}
+	
+	//Creates table that will store the users data
+	public static void createTable() throws Exception
+	{
+		try 
+		{
+			Connection con = getConnection();
+			/*Creates FinchSimonUsers table - the main table that stores user information. This checks if the table exists already
+			 * and if not it creates a new one, with these keys*/
+			PreparedStatement create = con.prepareStatement("CREATE TABLE IF NOT EXISTS finchsimonUsers(id int NOT NULL AUTO_INCREMENT, username varchar(255), firstname varchar(255), "
+					+ "lastname varchar(255), hiscore int, averagescore float, gamesplayed int, password varchar(255), overallScore int, PRIMARY KEY(id), FOREIGN KEY(hiscore) REFERENCES hiscores(score))");
+			create.executeUpdate();
+			
+			//Same as above but for FinchHiscores table
+			//Foreign key connects the two tables, in a one to one relationship
+			PreparedStatement createScores = con.prepareStatement("CREATE TABLE IF NOT EXISTS finchHiscores(scoreid int NOT NULL AUTO_INCREMENT,"
+			+ "score int, username varchar(255), id int, PRIMARY KEY(scoreid), FOREIGN KEY (id) REFERENCES finchsimonUsers(id))");
+			createScores.executeUpdate();
+		}
+		catch (Exception e) {System.out.println(e);}
+		finally{System.out.println("Function complete.");}
+		
+	}
+		
+	//For "emergency" use
+	//If mistakes are made while using tables, use this to remove them
+	public static void alterTable() throws Exception
+	{
+		try
+		{
+			Connection con = getConnection();
+			Statement st = con.createStatement();
+			st.execute("ALTER TABLE finchsimonUsers "+
+			"AUTO_INCREMENT = 1 ");
+		}catch(Exception e) {System.out.println(e);}
+	}
+	
+	//Creates connection to database server
+	public static Connection getConnection() throws Exception
+	{
+		//Player can only connect to database when server is on
+		try {
+			String driver = "com.mysql.cj.jdbc.Driver";
+			//IP of server
+			String url = "jdbc:mysql://192.168.0.118:3306/assignment0sql";
+			String username = "XinVinity";
+			String password = "Ethan1";
+			Class.forName(driver);
+			
+			//Creates connection to the server
+			Connection conn = DriverManager.getConnection(url, username, password);
+			System.out.println("Connected");
+			return conn;
+			} catch(Exception e) {System.out.println(e);}
+		return null;
+	}
+}
